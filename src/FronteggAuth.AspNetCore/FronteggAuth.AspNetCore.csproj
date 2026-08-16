@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet package metadata">
+    <IsPackable>true</IsPackable>
+    <PackageId>FronteggAuth.AspNetCore</PackageId>
+    <Description>Frontegg CIAM authentication and authorization for ASP.NET Core. OpenID Connect (interactive cookie login), JWT Bearer, and Frontegg API-key schemes behind a smart policy-scheme router, with automatic token refresh, OIDC failure recovery, an optional Redis-backed cookie session store, a pluggable claims provider (roles + permissions), permission/role attributes and dynamic policies, and a fully configurable claim-type model.</Description>
+    <PackageTags>frontegg;ciam;oidc;openid-connect;oauth2;jwt;bearer;authentication;authorization;aspnetcore;roles;permissions</PackageTags>
+  </PropertyGroup>
+
+  <!--
+    ASP.NET Core types (Authentication.Cookies, Authorization, DataProtection, Mvc.Core,
+    Http, Caching.Memory, Options, Logging, DI) come from the shared framework. Only
+    packages NOT in the shared framework are referenced explicitly below.
+  -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+    <PackageReference Include="StackExchange.Redis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FronteggAuth.AspNetCore.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

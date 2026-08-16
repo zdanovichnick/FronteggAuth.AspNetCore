@@ -1,0 +1,23 @@
+@page "/reports"
+@attribute [Authorize(Policy = SamplePermissions.ReportsReadPolicy)]
+
+@* The policy name is never registered anywhere. The package's FronteggPolicyProvider materializes any policy
+   whose name starts with "perm:" (or "permid:") on demand, so declaring the constant is the whole setup.
+
+   The permission *attributes* — [PermissionAuthorize], [PermissionIdAuthorize] — would do nothing here: they
+   are IAuthorizationFilters, and only the MVC action-invocation pipeline runs those. Policies are the surface
+   that works everywhere, which is why a Blazor app uses them. *@
+
+<PageTitle>Reports</PageTitle>
+
+<h1>Reports</h1>
+
+<p>
+    You hold <code>@SamplePermissions.ReportsRead</code>. A user without it never reaches this markup —
+    <code>AuthorizeRouteView</code> renders its <code>NotAuthorized</code> fragment instead.
+</p>
+
+<p>
+    Nothing on this page is real reporting; the point is that the gate above the <code>@@page</code> directive
+    is the only thing standing between an authenticated user and this content.
+</p>

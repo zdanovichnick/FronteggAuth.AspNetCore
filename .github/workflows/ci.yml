@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # Normalizes source paths in the PDB, matching what a release build produces.
+  CI: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Every target framework needs its own runtime to *run* tests, and net8.0/net9.0 need their
+      # Microsoft.NETCore.App.Host packs for the xunit.v3 app host. Installing the three SDKs supplies both.
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore FronteggAuth.AspNetCore.slnx
+
+      # --no-incremental because an incremental build reuses the previous compilation's outputs and
+      # replays none of its warnings, which lets a warning slip through a green run.
+      - name: Build
+        run: dotnet build FronteggAuth.AspNetCore.slnx -c Release --no-restore --no-incremental -warnaserror
+
+      # Runs the suite once per target framework, so a divergence between them fails rather than hides
+      # behind whichever framework the runner picked.
+      - name: Test
+        run: dotnet test FronteggAuth.AspNetCore.slnx -c Release --no-build --verbosity normal
+
+      # Packs but never pushes. Packaging has its own failure modes — a missing README, metadata the pack
+      # guard rejects, a framework-compatibility break caught by package validation — and finding them on
+      # the release tag means finding them after the version is already cut.
+      - name: Pack (validation only)
+        run: >
+          dotnet pack
+          src/FronteggAuth.AspNetCore/FronteggAuth.AspNetCore.csproj
+          src/FronteggAuth.AspNetCore.DataProtection.Aws/FronteggAuth.AspNetCore.DataProtection.Aws.csproj
+          -c Release --no-build
+          -o artifacts
+          -p:RepositoryUrl=${{ github.server_url }}/${{ github.repository }}
+          -p:PackageProjectUrl=${{ github.server_url }}/${{ github.repository }}
+
+  # A separate job so it reports independently of the compiler: a leaked internal name is a publishing
+  # defect, not a build error, and the two failures want different fixes.
+  brand-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The terms live in their own file rather than inline, so this step does not match itself.
+      - name: Reject internal names in the tree
+        run: |
+          if grep -rniIE -f .github/brand-denylist.txt . \
+               --exclude-dir=.git --exclude-dir=bin --exclude-dir=obj \
+               --exclude=brand-denylist.txt; then
+            echo "::error::Found an internal product name. This package is public; remove it before merging."
+            exit 1
+          fi

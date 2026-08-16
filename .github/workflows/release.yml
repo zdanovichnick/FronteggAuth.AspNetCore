@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  CI: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Gate the NUGET_API_KEY behind an environment so a push to nuget.org needs an approval this workflow
+    # cannot grant itself. Create the environment in repository settings before the first release.
+    environment: nuget
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      # The tag is the single source of the published version — nothing in the repository records it, so a
+      # malformed tag has to fail here rather than publish 1.0.0 from Directory.Build.props by default.
+      - name: Resolve version from tag
+        id: version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' is not v<semver>, e.g. v1.0.0 or v1.0.0-preview.1"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Restore
+        run: dotnet restore FronteggAuth.AspNetCore.slnx
+
+      - name: Build
+        run: dotnet build FronteggAuth.AspNetCore.slnx -c Release --no-restore --no-incremental -warnaserror
+
+      # Publishing an untested build is not worth the minutes it saves — a package version cannot be
+      # unpublished from nuget.org, only delisted.
+      - name: Test
+        run: dotnet test FronteggAuth.AspNetCore.slnx -c Release --no-build --verbosity normal
+
+      # RepositoryUrl and PackageProjectUrl come from the GitHub context rather than the csproj: they are
+      # properties of where this repository is published. Directory.Build.props fails the pack if they are
+      # missing, so a fork packing elsewhere cannot silently ship this repository's URLs.
+      # The two packable projects by name rather than the solution: packing the solution warns once per
+      # non-packable project, which is noise on every release.
+      - name: Pack
+        run: >
+          dotnet pack
+          src/FronteggAuth.AspNetCore/FronteggAuth.AspNetCore.csproj
+          src/FronteggAuth.AspNetCore.DataProtection.Aws/FronteggAuth.AspNetCore.DataProtection.Aws.csproj
+          -c Release --no-build
+          -o artifacts
+          -p:Version=${{ steps.version.outputs.version }}
+          -p:RepositoryUrl=${{ github.server_url }}/${{ github.repository }}
+          -p:PackageProjectUrl=${{ github.server_url }}/${{ github.repository }}
+          -p:RepositoryCommit=${{ github.sha }}
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+
+      # The matching .snupkg next to each .nupkg is pushed with it automatically, so it is not globbed here.
+      # --skip-duplicate makes re-running a failed release idempotent instead of erroring on the half already
+      # published: the two packages are pushed as separate requests and the second can fail alone.
+      - name: Push to nuget.org
+        run: >
+          dotnet nuget push "artifacts/*.nupkg"
+          --source https://api.nuget.org/v3/index.json
+          --api-key "$NUGET_API_KEY"
+          --skip-duplicate
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

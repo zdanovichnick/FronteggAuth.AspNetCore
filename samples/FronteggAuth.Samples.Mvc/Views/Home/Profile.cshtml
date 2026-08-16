@@ -1,0 +1,53 @@
+@model ApplicationUser
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<h1>Application user</h1>
+
+<table class="table table-striped">
+    <tbody>
+    <tr><th scope="row">Id</th><td>@Model.Id</td></tr>
+    <tr><th scope="row">Full name</th><td>@Model.FullName</td></tr>
+    <tr><th scope="row">Email</th><td>@Model.Email</td></tr>
+    <tr><th scope="row">Company id</th><td>@Model.CompanyId</td></tr>
+    <tr><th scope="row">Company name</th><td>@Model.CompanyName</td></tr>
+    <tr><th scope="row">Is admin</th><td>@Model.IsAdmin</td></tr>
+    <tr><th scope="row">Is system user</th><td>@Model.IsSystemUser</td></tr>
+    <tr><th scope="row">Roles</th><td>@Join(Model.Roles)</td></tr>
+    <tr><th scope="row">Permissions</th><td>@Join(Model.Permissions)</td></tr>
+    <tr><th scope="row">Permission ids</th><td>@Join(Model.PermissionIds.Select(id => id.ToString()))</td></tr>
+    </tbody>
+</table>
+
+<p class="text-muted">
+    <code>@SampleClaimsTransformer.ReportsManagerRole</code> in the roles above is not issued by your tenant — the
+    sample's <code>IClaimsTransformer</code> derives it from <code>@SamplePermissions.ReportsWrite</code>.
+</p>
+
+<h2 class="h4 mt-4">Raw principal</h2>
+
+@* The same data one layer down. When a field above is empty but the claim is present here, the mismatch is a
+   claim-type mapping problem — override the name under FronteggSettings:ClaimTypeNames. *@
+<table class="table table-sm">
+    <tbody>
+    @foreach (var claim in Displayable(User.Claims))
+    {
+        <tr><th scope="row">@claim.Type</th><td>@claim.Value</td></tr>
+    }
+    </tbody>
+</table>
+
+@functions {
+    private static string Join(IEnumerable<string> values)
+    {
+        var joined = string.Join(", ", values);
+        return joined.Length == 0 ? "—" : joined;
+    }
+
+    // access_token, id_token and refresh_token arrive as ordinary claims on the cookie principal. Rendering
+    // them would put a live credential into the page source, the browser cache, and any screenshot of it.
+    private static IEnumerable<System.Security.Claims.Claim> Displayable(
+        IEnumerable<System.Security.Claims.Claim> claims) =>
+        claims.Where(claim => claim.Type is not ("access_token" or "id_token" or "refresh_token"));
+}

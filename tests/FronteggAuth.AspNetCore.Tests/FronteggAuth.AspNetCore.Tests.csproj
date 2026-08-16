@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <IsTestProject>true</IsTestProject>
+    <!-- xunit.v3 requires an executable with a native app host. Declaring it here rather than letting the
+         package's own targets do it is what makes restore see it: restore evaluates the project before package
+         build assets are imported, and only then does it download the matching Microsoft.NETCore.App.Host pack
+         for a target framework whose SDK is not installed on the machine. -->
+    <OutputType>Exe</OutputType>
+    <UseAppHost>true</UseAppHost>
+    <!-- Nothing here is public API; XML docs on test methods would be noise. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- xunit.v3 requires an app host, so every target framework needs a matching
+         Microsoft.NETCore.App.Host pack. A machine that has a runtime but not the corresponding SDK has the
+         runtime without the pack, so ask NuGet for it rather than failing the build late in the copy step. -->
+    <EnableAppHostPackDownload>true</EnableAppHostPackDownload>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="AwesomeAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FronteggAuth.AspNetCore\FronteggAuth.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\FronteggAuth.AspNetCore.DataProtection.Aws\FronteggAuth.AspNetCore.DataProtection.Aws.csproj" />
+  </ItemGroup>
+
+</Project>

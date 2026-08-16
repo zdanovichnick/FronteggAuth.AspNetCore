@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FronteggAuth.AspNetCore/FronteggAuth.AspNetCore.csproj" />
+    <Project Path="src/FronteggAuth.AspNetCore.DataProtection.Aws/FronteggAuth.AspNetCore.DataProtection.Aws.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FronteggAuth.AspNetCore.Tests/FronteggAuth.AspNetCore.Tests.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/FronteggAuth.Samples.Api/FronteggAuth.Samples.Api.csproj" />
+    <Project Path="samples/FronteggAuth.Samples.Blazor/FronteggAuth.Samples.Blazor.csproj" />
+    <Project Path="samples/FronteggAuth.Samples.Mvc/FronteggAuth.Samples.Mvc.csproj" />
+    <File Path="samples/README.md" />
+  </Folder>
+  <Folder Name="/solution items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="NuGet.config" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+    <File Path="LICENSE" />
+  </Folder>
+</Solution>

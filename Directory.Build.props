@@ -1,0 +1,45 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Opted into per project; nothing is packable unless it says so. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package metadata">
+    <Version>1.0.0</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!--
+      PublishRepositoryUrl promotes the SDK's auto-detected git remote over any RepositoryUrl set here,
+      so the packed nuspec records whatever remote the machine happens to have. RepositoryUrl is pinned
+      explicitly instead (see the pack guard below) and this stays off so it cannot be overwritten.
+    -->
+    <PublishRepositoryUrl>false</PublishRepositoryUrl>
+    <!-- Normalizes absolute source paths to /_/ in the PDB. Deterministic alone does not do this. -->
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+
+  <!--
+    RepositoryUrl and PackageProjectUrl are not hard-coded: they are properties of wherever this repository
+    is published, not of the source. CI supplies them from the GitHub context; a local pack passes
+    -p:RepositoryUrl=... A package shipped without them loses SourceLink and the project link on nuget.org,
+    which is silent and only discoverable after publishing — so packing without them fails here instead.
+  -->
+  <Target Name="ValidatePublicPackageMetadata" BeforeTargets="GenerateNuspec" Condition="'$(IsPackable)' == 'true'">
+    <Error Condition="!$(RepositoryUrl.StartsWith('https://'))"
+           Text="RepositoryUrl must be set to the public https clone URL before packing, e.g. dotnet pack -p:RepositoryUrl=https://github.com/OWNER/REPO -p:PackageProjectUrl=https://github.com/OWNER/REPO" />
+    <Error Condition="!$(PackageProjectUrl.StartsWith('https://'))"
+           Text="PackageProjectUrl must be set to the public project page before packing." />
+  </Target>
+
+</Project>

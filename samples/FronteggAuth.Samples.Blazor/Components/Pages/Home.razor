@@ -1,0 +1,25 @@
+@page "/"
+
+<PageTitle>FronteggAuth Blazor sample</PageTitle>
+
+<h1>You are signed in</h1>
+
+<p>
+    Reaching this page means the whole interactive flow worked: the package's gating middleware saw an
+    unauthenticated browser request, challenged the <code>Frontegg.Oidc</code> scheme, Frontegg authenticated
+    you, and the callback wrote the session cookie.
+</p>
+
+<p>Two pages show what the package puts in front of a Blazor component:</p>
+
+<ul>
+    <li>
+        <a href="user">Current user</a> — the <code>ApplicationUser</code> projection, statically
+        server-rendered so it can read the request principal.
+    </li>
+    <li>
+        <a href="reports">Reports</a> — gated by
+        <code>[Authorize(Policy = "perm:sample.reports.read")]</code>. Without that permission in your tenant
+        you get the <em>Not authorized</em> message rather than a redirect.
+    </li>
+</ul>

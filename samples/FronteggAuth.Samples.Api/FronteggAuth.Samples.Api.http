@@ -1,0 +1,49 @@
+@host = https://localhost:7210
+
+# Paste a Frontegg-issued access token (Authorization: Bearer) and/or a Frontegg API key (X-API-KEY).
+# Both are live credentials — keep them out of commits.
+@accessToken =
+@apiKey =
+
+### Anonymous. The only endpoint carrying AllowAnonymous, so the only one that answers without a credential.
+GET {{host}}/api/ping
+
+### No credential on a gated endpoint -> 401 from the package's gating middleware, before authorization runs.
+GET {{host}}/api/reports
+
+### Bearer access token.
+GET {{host}}/api/diagnostics/me
+Authorization: Bearer {{accessToken}}
+
+### API key. Same endpoint, different handler: lifetime is not validated, revocation is checked per request.
+GET {{host}}/api/diagnostics/me
+X-API-KEY: {{apiKey}}
+
+### Every claim on the principal, minus the token claims. Start here when a field on /me is empty.
+GET {{host}}/api/diagnostics/claims
+Authorization: Bearer {{accessToken}}
+
+### Evaluate a permission policy without being gated by it — 200 either way, `granted` carries the answer.
+GET {{host}}/api/diagnostics/permission?key=sample.reports.read
+Authorization: Bearer {{accessToken}}
+
+### Same for the numeric form. `mapsToKey` is null when FronteggSettings:PermissionIdMappings has no entry,
+### which is the most common reason a permid: gate denies unexpectedly.
+GET {{host}}/api/diagnostics/permission-id/101
+Authorization: Bearer {{accessToken}}
+
+### Pre-flight the client-credentials tenant token. Reports success only; the token is never returned.
+GET {{host}}/api/diagnostics/tenant-token
+Authorization: Bearer {{accessToken}}
+
+### Gated on perm:sample.reports.read.
+GET {{host}}/api/reports
+Authorization: Bearer {{accessToken}}
+
+### Gated on permid:101.
+DELETE {{host}}/api/reports/7
+Authorization: Bearer {{accessToken}}
+
+### Gated on the admin role rather than a permission.
+GET {{host}}/api/reports/admin-summary
+Authorization: Bearer {{accessToken}}

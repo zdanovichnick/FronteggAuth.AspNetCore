@@ -1,0 +1,45 @@
+<svg viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="900" height="380" fill="#ffffff"/>
+
+  <!-- Incoming request -->
+  <rect x="30" y="160" width="150" height="60" rx="10" fill="#1f2937"/>
+  <text x="105" y="185" fill="#fff" font-size="14" text-anchor="middle" font-weight="600">Incoming</text>
+  <text x="105" y="203" fill="#fff" font-size="14" text-anchor="middle" font-weight="600">HTTP request</text>
+
+  <!-- Router -->
+  <rect x="250" y="150" width="200" height="80" rx="10" fill="#4F6BFF"/>
+  <text x="350" y="182" fill="#fff" font-size="15" text-anchor="middle" font-weight="700">Smart scheme</text>
+  <text x="350" y="202" fill="#fff" font-size="15" text-anchor="middle" font-weight="700">router</text>
+  <text x="350" y="220" fill="#dbe2ff" font-size="11" text-anchor="middle">FronteggAuthSchemes.Smart</text>
+
+  <!-- Arrow request -> router -->
+  <line x1="180" y1="190" x2="248" y2="190" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Three branches -->
+  <!-- OIDC -->
+  <line x1="450" y1="180" x2="600" y2="80" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="600" y="45" width="270" height="70" rx="10" fill="#0EA5A5"/>
+  <text x="735" y="72" fill="#fff" font-size="14" text-anchor="middle" font-weight="700">OpenID Connect</text>
+  <text x="735" y="92" fill="#e6fffb" font-size="11" text-anchor="middle">no auth header + Accept: text/html</text>
+  <text x="735" y="106" fill="#e6fffb" font-size="11" text-anchor="middle">→ cookie session, auto refresh</text>
+
+  <!-- JWT Bearer -->
+  <line x1="450" y1="190" x2="600" y2="190" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="600" y="155" width="270" height="70" rx="10" fill="#F59E0B"/>
+  <text x="735" y="182" fill="#fff" font-size="14" text-anchor="middle" font-weight="700">JWT Bearer</text>
+  <text x="735" y="202" fill="#fff" font-size="11" text-anchor="middle">Authorization: Bearer &lt;token&gt;</text>
+  <text x="735" y="216" fill="#fff" font-size="11" text-anchor="middle">→ Frontegg-issued access token</text>
+
+  <!-- API key -->
+  <line x1="450" y1="200" x2="600" y2="300" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="600" y="265" width="270" height="70" rx="10" fill="#E1306C"/>
+  <text x="735" y="292" fill="#fff" font-size="14" text-anchor="middle" font-weight="700">API key</text>
+  <text x="735" y="312" fill="#ffe1ec" font-size="11" text-anchor="middle">X-API-KEY header (configurable)</text>
+  <text x="735" y="326" fill="#ffe1ec" font-size="11" text-anchor="middle">→ Frontegg vendor introspection</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#333"/>
+    </marker>
+  </defs>
+</svg>

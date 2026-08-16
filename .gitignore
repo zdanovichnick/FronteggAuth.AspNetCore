@@ -1,0 +1,33 @@
+## Build output
+[Bb]in/
+[Oo]bj/
+artifacts/
+*.user
+*.suo
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.DotSettings.user
+
+## Test / coverage
+[Tt]est[Rr]esult*/
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+
+## Packages
+*.nupkg
+*.snupkg
+
+## Local secrets and environment overrides — never commit these
+appsettings.Development.json
+appsettings.Local.json
+.env
+*.pfx
+
+## OS
+.DS_Store
+Thumbs.db

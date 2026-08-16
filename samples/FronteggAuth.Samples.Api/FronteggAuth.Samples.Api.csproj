@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>FronteggAuth.Samples.Api</RootNamespace>
+    <!-- Nothing here is public API, so undocumented members are not a gap worth a warning. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <UserSecretsId>frontegg-auth-sample-api</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FronteggAuth.AspNetCore\FronteggAuth.AspNetCore.csproj" />
+  </ItemGroup>
+
+</Project>

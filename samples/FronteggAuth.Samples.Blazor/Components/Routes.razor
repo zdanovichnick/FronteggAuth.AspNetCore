@@ -1,0 +1,22 @@
+@* AuthorizeRouteView rather than RouteView: it is what makes a page-level [Authorize] attribute do anything.
+   A plain RouteView renders the component regardless of the attribute. The NotAuthorized fragment is what a
+   user who is signed in but lacks the required permission sees — the package's gating middleware has already
+   handled the not-signed-in case by challenging before the component ever renders. *@
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                <h1>Not authorized</h1>
+                <p>
+                    You are signed in, but your account does not hold the permission this page requires.
+                    Grant it in the Frontegg admin portal and sign in again — enriched claims are cached for
+                    <code>FronteggSettings:ClaimsCacheDurationSeconds</code> seconds.
+                </p>
+            </NotAuthorized>
+            <Authorizing>
+                <p>Checking your permissions…</p>
+            </Authorizing>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>

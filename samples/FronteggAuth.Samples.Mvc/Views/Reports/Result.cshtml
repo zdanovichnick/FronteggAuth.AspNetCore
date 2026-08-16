@@ -1,0 +1,17 @@
+@model GateResult
+@{
+    ViewData["Title"] = Model.Action;
+}
+
+<h1>@Model.Action</h1>
+
+<p class="lead">You got through this gate:</p>
+
+<pre class="bg-white border rounded p-3"><code>@Model.Gate</code></pre>
+
+<p>@Model.Explanation</p>
+
+<p class="text-muted">
+    See <a asp-controller="Home" asp-action="Profile">your profile</a> for the roles and permissions this
+    decision was made from.
+</p>

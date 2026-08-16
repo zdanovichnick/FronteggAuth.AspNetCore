@@ -1,0 +1,46 @@
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">FronteggAuth Blazor sample</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="user">
+                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Current user
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="reports">
+                <span class="bi bi-lock-fill-nav-menu" aria-hidden="true"></span> Reports (permission gated)
+            </NavLink>
+        </div>
+
+        @* AuthorizeView reads the cascading authentication state, so the sign-out link only renders for a
+           signed-in user. The package has already authenticated the request by the time this renders — the
+           Authorized branch is effectively always taken here, but keeping the guard is what lets this menu
+           survive being reused in an app that also serves anonymous pages. *@
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    @* A plain anchor, not a NavLink: /account/logout is a minimal-API endpoint that issues a
+                       redirect to Frontegg, not a routable Blazor page. Client-side navigation would never
+                       reach it. *@
+                    <a class="nav-link" href="account/logout">
+                        Sign out @(context.User.Identity?.Name)
+                    </a>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </nav>
+</div>

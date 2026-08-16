@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet package metadata">
+    <IsPackable>true</IsPackable>
+    <PackageId>FronteggAuth.AspNetCore.DataProtection.Aws</PackageId>
+    <Description>AWS Systems Manager Parameter Store persistence for FronteggAuth.AspNetCore's Data Protection key ring. Optional companion package — the core package takes no dependency on the AWS SDK.</Description>
+    <PackageTags>frontegg;aspnetcore;dataprotection;aws;ssm;parameter-store;authentication</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Amazon.AspNetCore.DataProtection.SSM" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FronteggAuth.AspNetCore\FronteggAuth.AspNetCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

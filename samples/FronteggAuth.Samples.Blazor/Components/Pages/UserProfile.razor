@@ -1,0 +1,79 @@
+@page "/user"
+@using FronteggAuth.AspNetCore.Abstractions
+@using FronteggAuth.AspNetCore.Models
+@inject IIdentityUserService IdentityUserService
+
+@* Statically server-rendered (no @@rendermode): IIdentityUserService reads the current principal from
+   IHttpContextAccessor, which exists during SSR but not inside a persistent interactive circuit. In an
+   interactive component, read AuthenticationStateProvider instead — see the ClaimsPrincipal section below,
+   which does exactly that and works in either render mode. *@
+
+<PageTitle>Current user</PageTitle>
+
+<h1>Application user</h1>
+
+@if (_user is null)
+{
+    <p>No authenticated user.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <tbody>
+            <tr><th scope="row">Id</th><td>@_user.Id</td></tr>
+            <tr><th scope="row">Name</th><td>@_user.Name</td></tr>
+            <tr><th scope="row">Full name</th><td>@_user.FullName</td></tr>
+            <tr><th scope="row">Initials</th><td>@_user.Initials</td></tr>
+            <tr><th scope="row">Email</th><td>@_user.Email</td></tr>
+            <tr><th scope="row">Company id</th><td>@_user.CompanyId</td></tr>
+            <tr><th scope="row">Company name</th><td>@_user.CompanyName</td></tr>
+            <tr><th scope="row">Department</th><td>@_user.Department</td></tr>
+            <tr><th scope="row">Is admin</th><td>@_user.IsAdmin</td></tr>
+            <tr><th scope="row">Is system user</th><td>@_user.IsSystemUser</td></tr>
+            <tr><th scope="row">Roles</th><td>@Join(_user.Roles)</td></tr>
+            <tr><th scope="row">Permissions</th><td>@Join(_user.Permissions)</td></tr>
+            <tr><th scope="row">Permission ids</th><td>@Join(_user.PermissionIds.Select(id => id.ToString()))</td></tr>
+        </tbody>
+    </table>
+}
+
+<h2>Raw principal</h2>
+
+@* The same data one layer down. When a field above is empty but the claim is present here, the mismatch is a
+   claim-type mapping problem — override the name in FronteggSettings:ClaimTypeNames. *@
+<AuthorizeView>
+    <Authorized>
+        <table class="table table-sm">
+            <tbody>
+                @foreach (var claim in Displayable(context.User.Claims))
+                {
+                    <tr><th scope="row">@claim.Type</th><td>@claim.Value</td></tr>
+                }
+            </tbody>
+        </table>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private ApplicationUser? _user;
+
+    // GetUserAsync rather than the User property: User projects only what is already on the principal, and the
+    // claims-enrichment middleware is skipped on some paths (anonymous endpoints, unmatched routes, the OIDC
+    // callback). GetUserAsync back-fills from the claims provider so roles and permissions are populated
+    // regardless of how this request arrived.
+    protected override async Task OnInitializedAsync() =>
+        _user = await IdentityUserService.GetUserAsync();
+
+    private static string Join(IEnumerable<string> values)
+    {
+        var joined = string.Join(", ", values);
+        return joined.Length == 0 ? "—" : joined;
+    }
+
+    // access_token and id_token are live credentials that arrive as ordinary claims on the cookie principal.
+    // Rendering them into HTML would put a bearer token in the page source, the browser cache, and any
+    // screenshot of this page.
+    private static IEnumerable<System.Security.Claims.Claim> Displayable(
+        IEnumerable<System.Security.Claims.Claim> claims) =>
+        claims.Where(claim => claim.Type is not ("access_token" or "id_token" or "refresh_token"));
+}

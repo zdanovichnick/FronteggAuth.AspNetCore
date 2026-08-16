@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<h1>MVC sample</h1>
+
+<p class="lead">
+    This is the only page a signed-out visitor can reach, and only because its action carries
+    <code>[AllowAnonymous]</code>.
+</p>
+
+<p>
+    Every other page here is behind interactive login — not because it declares a policy, but because the
+    package's gating middleware challenges any matched endpoint that is not explicitly anonymous. Follow one of
+    the links above and you will be sent to Frontegg first.
+</p>
+
+<h2 class="h4 mt-4">Where the gates are</h2>
+
+<table class="table table-striped">
+    <thead>
+    <tr><th>Page</th><th>Gate</th></tr>
+    </thead>
+    <tbody>
+    <tr><td><a asp-controller="Home" asp-action="Profile">Home/Profile</a></td><td>authenticated</td></tr>
+    <tr><td><a asp-controller="Reports" asp-action="Index">Reports/Index</a></td><td><code>[PermissionAuthorize]</code> on the controller</td></tr>
+    <tr><td><a asp-controller="Reports" asp-action="Create">Reports/Create</a></td><td>two stacked <code>[PermissionAuthorize]</code> — AND</td></tr>
+    <tr><td><a asp-controller="Reports" asp-action="Export">Reports/Export</a></td><td><code>[PermissionIdAuthorize]</code> — numeric id</td></tr>
+    <tr><td><a asp-controller="Reports" asp-action="Restricted">Reports/Restricted</a></td><td><code>ReversePermissions</code> — denies on presence</td></tr>
+    <tr><td><a asp-controller="Reports" asp-action="Manage">Reports/Manage</a></td><td><code>[RoleAuthorize]</code>, one role synthesized by a claims transformer</td></tr>
+    <tr><td><a asp-controller="Reports" asp-action="Help">Reports/Help</a></td><td><code>[SkipAuth]</code> — signed in, no permission check</td></tr>
+    </tbody>
+</table>
+
+<p class="text-muted">
+    A page you are not allowed to see answers 403 with an RFC 7807 body rather than redirecting: by the time a
+    filter runs you are authenticated, just not permitted.
+</p>
