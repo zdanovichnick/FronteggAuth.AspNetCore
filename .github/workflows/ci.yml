@@ -50,15 +50,18 @@ jobs:
       # Packs but never pushes. Packaging has its own failure modes — a missing README, metadata the pack
       # guard rejects, a framework-compatibility break caught by package validation — and finding them on
       # the release tag means finding them after the version is already cut.
+      # dotnet pack takes exactly one project (unlike build/test), so each packable project gets its own
+      # invocation rather than one command listing both.
       - name: Pack (validation only)
-        run: >
-          dotnet pack
-          src/FronteggAuth.AspNetCore/FronteggAuth.AspNetCore.csproj
-          src/FronteggAuth.AspNetCore.DataProtection.Aws/FronteggAuth.AspNetCore.DataProtection.Aws.csproj
-          -c Release --no-build
-          -o artifacts
-          -p:RepositoryUrl=${{ github.server_url }}/${{ github.repository }}
-          -p:PackageProjectUrl=${{ github.server_url }}/${{ github.repository }}
+        run: |
+          dotnet pack src/FronteggAuth.AspNetCore/FronteggAuth.AspNetCore.csproj \
+            -c Release --no-build -o artifacts \
+            -p:RepositoryUrl=${{ github.server_url }}/${{ github.repository }} \
+            -p:PackageProjectUrl=${{ github.server_url }}/${{ github.repository }}
+          dotnet pack src/FronteggAuth.AspNetCore.DataProtection.Aws/FronteggAuth.AspNetCore.DataProtection.Aws.csproj \
+            -c Release --no-build -o artifacts \
+            -p:RepositoryUrl=${{ github.server_url }}/${{ github.repository }} \
+            -p:PackageProjectUrl=${{ github.server_url }}/${{ github.repository }}
 
   # A separate job so it reports independently of the compiler: a leaked internal name is a publishing
   # defect, not a build error, and the two failures want different fixes.

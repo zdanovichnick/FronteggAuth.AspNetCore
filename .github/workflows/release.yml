@@ -59,17 +59,21 @@ jobs:
       # missing, so a fork packing elsewhere cannot silently ship this repository's URLs.
       # The two packable projects by name rather than the solution: packing the solution warns once per
       # non-packable project, which is noise on every release.
+      # dotnet pack takes exactly one project (unlike build/test), so each gets its own invocation.
       - name: Pack
-        run: >
-          dotnet pack
-          src/FronteggAuth.AspNetCore/FronteggAuth.AspNetCore.csproj
-          src/FronteggAuth.AspNetCore.DataProtection.Aws/FronteggAuth.AspNetCore.DataProtection.Aws.csproj
-          -c Release --no-build
-          -o artifacts
-          -p:Version=${{ steps.version.outputs.version }}
-          -p:RepositoryUrl=${{ github.server_url }}/${{ github.repository }}
-          -p:PackageProjectUrl=${{ github.server_url }}/${{ github.repository }}
-          -p:RepositoryCommit=${{ github.sha }}
+        run: |
+          dotnet pack src/FronteggAuth.AspNetCore/FronteggAuth.AspNetCore.csproj \
+            -c Release --no-build -o artifacts \
+            -p:Version=${{ steps.version.outputs.version }} \
+            -p:RepositoryUrl=${{ github.server_url }}/${{ github.repository }} \
+            -p:PackageProjectUrl=${{ github.server_url }}/${{ github.repository }} \
+            -p:RepositoryCommit=${{ github.sha }}
+          dotnet pack src/FronteggAuth.AspNetCore.DataProtection.Aws/FronteggAuth.AspNetCore.DataProtection.Aws.csproj \
+            -c Release --no-build -o artifacts \
+            -p:Version=${{ steps.version.outputs.version }} \
+            -p:RepositoryUrl=${{ github.server_url }}/${{ github.repository }} \
+            -p:PackageProjectUrl=${{ github.server_url }}/${{ github.repository }} \
+            -p:RepositoryCommit=${{ github.sha }}
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
