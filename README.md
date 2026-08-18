@@ -23,10 +23,10 @@ paths look the way they do.
 
 ## Packages
 
-| Package | What it is |
-|---|---|
-| [`FronteggAuth.AspNetCore`](src/FronteggAuth.AspNetCore/README.md) | The integration. No AWS, Azure, or other cloud dependency. |
-| [`FronteggAuth.AspNetCore.DataProtection.Aws`](src/FronteggAuth.AspNetCore.DataProtection.Aws/README.md) | Optional. Persists the Data Protection key ring to AWS SSM Parameter Store. |
+| Package | NuGet | What it is |
+|---|---|---|
+| [`FronteggAuth.AspNetCore`](src/FronteggAuth.AspNetCore/README.md) | [![NuGet](https://img.shields.io/nuget/v/FronteggAuth.AspNetCore.svg)](https://www.nuget.org/packages/FronteggAuth.AspNetCore) | The integration. No AWS, Azure, or other cloud dependency. |
+| [`FronteggAuth.AspNetCore.DataProtection.Aws`](src/FronteggAuth.AspNetCore.DataProtection.Aws/README.md) | [![NuGet](https://img.shields.io/nuget/v/FronteggAuth.AspNetCore.DataProtection.Aws.svg)](https://www.nuget.org/packages/FronteggAuth.AspNetCore.DataProtection.Aws) | Optional. Persists the Data Protection key ring to AWS SSM Parameter Store. |
 
 Both target `net8.0`, `net9.0`, and `net10.0`.
 
