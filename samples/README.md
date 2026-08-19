@@ -36,7 +36,9 @@ ignored without an error — the one case where picking the wrong surface fails 
 
 ## Running any of them
 
-Each sample needs a Frontegg tenant. Set the non-secret half in the sample's `appsettings.json`:
+Each sample needs a Frontegg tenant. `ClientId`, `Authority`, `ApiBaseUrl`, and `ApiKey` are the four
+**required** `FronteggSettings` keys — see [getting-started.md §3](../docs/getting-started.md#3-configure) for
+those plus the full optional-key reference. Set the non-secret three in the sample's `appsettings.json`:
 
 ```json
 "FronteggSettings": {
@@ -46,7 +48,7 @@ Each sample needs a Frontegg tenant. Set the non-secret half in the sample's `ap
 }
 ```
 
-and the vendor secret in user-secrets, never in the file:
+and the vendor secret (`ApiKey`) in user-secrets, never in the file:
 
 ```bash
 dotnet user-secrets set "FronteggSettings:ApiKey" "<your vendor client secret>"
