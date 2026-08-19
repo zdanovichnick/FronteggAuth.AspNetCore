@@ -32,7 +32,46 @@ dotnet add package FronteggAuth.AspNetCore
 
 ## Configure
 
-Bind from the `FronteggSettings` section:
+Bind from the `FronteggSettings` section. Nothing is validated at startup — an omitted required value fails
+later, at first use (an empty `Authority`/`ClientId` breaks token validation; a missing `ApiKey` breaks claims
+enrichment), not at `AddFronteggAuth`.
+
+**Required** — the package cannot do anything useful without these:
+
+| Key | Purpose |
+|---|---|
+| `ClientId` | OAuth client ID; also the JWT audience |
+| `Authority` | Frontegg OIDC issuer (your login domain) |
+| `ApiBaseUrl` | Frontegg REST API base URL |
+| `ApiKey` | Vendor/M2M client secret used to obtain the vendor token for claims enrichment. Credential — keep out of source (user-secrets/env/secret store) |
+
+**Optional** — every other key has a working default or only applies to a feature you opt into:
+
+| Key | Default | Matters when |
+|---|---|---|
+| `CookieName` | `.FronteggAuth` | Always (cookie scheme) |
+| `CookieDomain` | unset | Cross-subdomain SSO |
+| `PostLogoutRedirectUri` | unset | OIDC sign-out |
+| `InteractiveSignInPath` | `/` | Silent OIDC recovery |
+| `CookieBlockedRedirectUri` | unset | Browser can't persist the correlation cookie |
+| `DeprecatedCookieNames` | unset | Migrating off an old cookie name |
+| `ClaimsCacheDurationSeconds` | `10` | Always (claims enrichment) |
+| `FailOpenOnClaimsUnavailable` | `false` | You want role-less access during a Frontegg outage instead of a 401 |
+| `AccessTokenCacheDurationSeconds` | `300` | API-key scheme |
+| `CookieLifetimeMinutes` | `10080` (7 days) | Cookie scheme |
+| `ApiTokenAuthority` | falls back to `Authority` | M2M/API-key tokens are issued by a different domain than interactive sign-in |
+| `PermissionIdMappings` | unset | You address permissions by numeric ID as well as by key |
+| `UserTokenDescription` | `frontegg-auth user token` | Cosmetic — shown in the Frontegg admin UI |
+| `DataProtectionApplicationName` | `frontegg-auth` | Always — must match across every instance sharing a cookie |
+| `TenantClientId` / `TenantSecret` | unset | Tenant-scoped access-token retrieval |
+| `EnableCookie` / `EnableOpenIdConnect` / `EnableJwtBearer` / `EnableApiKey` | all `true` | Disable schemes you don't expose, e.g. a token-only API |
+| `ApiKeyHeaderName` | `X-API-KEY` | API-key scheme |
+| `RedisConnectionString` | unset | Distributed cookie ticket store — see [Redis ticket store](#redis-ticket-store) |
+| `BypassRoles` / `BypassTokenTypes` | `{ "system" }` / `{ "tenantApiToken" }` | Changing which principals skip permission checks |
+| `ClaimTypeNames` | package defaults | A host renamed a claim type |
+
+`ConfigureDataProtection` is code-only (an `Action<IDataProtectionBuilder>`), not a configuration value — set it
+through the second `AddFronteggAuth` overload.
 
 ```jsonc
 {

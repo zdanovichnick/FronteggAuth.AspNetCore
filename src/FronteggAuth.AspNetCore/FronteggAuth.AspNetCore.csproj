@@ -14,7 +14,7 @@
   <!--
     ASP.NET Core types (Authentication.Cookies, Authorization, DataProtection, Mvc.Core,
     Http, Caching.Memory, Options, Logging, DI) come from the shared framework. Only
-    packages NOT in the shared framework are referenced explicitly below.
+    packages NOT in the shared framework are referenced explicitly below. 
   -->
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
