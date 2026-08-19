@@ -38,7 +38,45 @@ anything else unless you add it.
 
 ## 3. Configure
 
-One section, `FronteggSettings`:
+One section, `FronteggSettings`. Nothing is validated at startup — an omitted required value fails later, at
+first use, not at `AddFronteggAuth`.
+
+**Required** — the package cannot do anything useful without these:
+
+| Key | Purpose |
+|---|---|
+| `ClientId` | OAuth client ID; also the JWT audience |
+| `Authority` | Frontegg OIDC issuer (your login domain) |
+| `ApiBaseUrl` | Frontegg REST API base URL |
+| `ApiKey` | Vendor/M2M client secret used to obtain the vendor token for claims enrichment. Credential — keep out of source (user-secrets/env/secret store) |
+
+**Optional** — every other key has a working default or only applies to a feature you opt into:
+
+| Key | Default | Matters when |
+|---|---|---|
+| `CookieName` | `.FronteggAuth` | Always (cookie scheme) |
+| `CookieDomain` | unset | Cross-subdomain SSO |
+| `PostLogoutRedirectUri` | unset | OIDC sign-out |
+| `InteractiveSignInPath` | `/` | Silent OIDC recovery |
+| `CookieBlockedRedirectUri` | unset | Browser can't persist the correlation cookie |
+| `DeprecatedCookieNames` | unset | Migrating off an old cookie name |
+| `ClaimsCacheDurationSeconds` | `10` | Always (claims enrichment) |
+| `FailOpenOnClaimsUnavailable` | `false` | You want role-less access during a Frontegg outage instead of a 401 |
+| `AccessTokenCacheDurationSeconds` | `300` | API-key scheme |
+| `CookieLifetimeMinutes` | `10080` (7 days) | Cookie scheme |
+| `ApiTokenAuthority` | falls back to `Authority` | M2M/API-key tokens are issued by a different domain than interactive sign-in |
+| `PermissionIdMappings` | unset | You address permissions by numeric ID as well as by key |
+| `UserTokenDescription` | `frontegg-auth user token` | Cosmetic — shown in the Frontegg admin UI |
+| `DataProtectionApplicationName` | `frontegg-auth` | Always — must match across every instance sharing a cookie |
+| `TenantClientId` / `TenantSecret` | unset | Tenant-scoped access-token retrieval |
+| `EnableCookie` / `EnableOpenIdConnect` / `EnableJwtBearer` / `EnableApiKey` | all `true` | Disable schemes you don't expose, e.g. a token-only API (see §4) |
+| `ApiKeyHeaderName` | `X-API-KEY` | API-key scheme |
+| `RedisConnectionString` | unset | Distributed cookie ticket store — see §7 |
+| `BypassRoles` / `BypassTokenTypes` | `{ "system" }` / `{ "tenantApiToken" }` | Changing which principals skip permission checks |
+| `ClaimTypeNames` | package defaults | A host renamed a claim type |
+
+`ConfigureDataProtection` is code-only (an `Action<IDataProtectionBuilder>`), not a configuration value — set it
+through the second `AddFronteggAuth` overload (§7).
 
 ```jsonc
 {
@@ -58,6 +96,8 @@ One section, `FronteggSettings`:
   }
 }
 ```
+
+`ApiKey` and `TenantSecret` go in user-secrets or a secret store, never in this block (see §1).
 
 Every claim-type name is configurable under `FronteggSettings:ClaimTypeNames`. You will not need that until a
 value comes back empty — see the troubleshooting table.
